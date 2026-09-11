@@ -136,6 +136,7 @@
   <div id="dbgSecure">secure context (https): checking...</div>
   <div id="dbgEvents">events received: 0</div>
   <div id="dbgSpeed">last speed: -</div>
+  <div id="dbgHits">hits in window: 0 / 3</div>
   <div id="dbgTrigger">shake triggers: 0</div>
 </div>
 
@@ -193,10 +194,13 @@
   const scannerOverlay = document.getElementById('scannerOverlay');
   const closeScan = document.getElementById('closeScan');
 
-  let lastX=null, lastY=null, lastZ=null, lastTime=0;
-  const SHAKE_THRESHOLD = 16;
+  let lastX=null, lastY=null, lastZ=null;
+  const MAGNITUDE_THRESHOLD = 22;   // gravity baseline ~9.8; badhao to kam sensitive, ghatao to zyada sensitive
+  const REQUIRED_HITS = 3;          // kitni baar threshold cross ho window ke andar tabhi "real shake" mana jayega
+  const HIT_WINDOW_MS = 1000;       // is window ke andar hits count hote hain
   const COOLDOWN_MS = 6000;
   let lastTrigger = 0;
+  let hitTimestamps = [];
 
   function setStatus(msg){ statusEl.textContent = msg; }
 
@@ -205,6 +209,7 @@
   const dbgSecure = document.getElementById('dbgSecure');
   const dbgEvents = document.getElementById('dbgEvents');
   const dbgSpeed = document.getElementById('dbgSpeed');
+  const dbgHits = document.getElementById('dbgHits');
   const dbgTrigger = document.getElementById('dbgTrigger');
   let eventCount = 0;
   let triggerCount = 0;
@@ -228,16 +233,22 @@
     const acc = event.accelerationIncludingGravity || event.acceleration;
     if(!acc || acc.x===null || acc.x===undefined) return;
     const {x,y,z} = acc;
-    const currentTime = Date.now();
-    if(lastTime && (currentTime - lastTime) > 100){
-      const diffTime = currentTime - lastTime;
-      const speed = Math.abs(x+y+z-lastX-lastY-lastZ) / diffTime * 10000;
-      dbgSpeed.textContent = 'last speed: ' + speed.toFixed(1) + ' (threshold ' + SHAKE_THRESHOLD + ')';
-      if(speed > SHAKE_THRESHOLD) triggerSequence();
-      lastX=x; lastY=y; lastZ=z; lastTime=currentTime;
-    } else if(!lastTime){
-      lastX=x; lastY=y; lastZ=z; lastTime=currentTime;
+
+    const magnitude = Math.sqrt(x*x + y*y + z*z);
+    dbgSpeed.textContent = 'magnitude: ' + magnitude.toFixed(1) + ' (threshold ' + MAGNITUDE_THRESHOLD + ')';
+
+    if(magnitude > MAGNITUDE_THRESHOLD){
+      const now = Date.now();
+      hitTimestamps.push(now);
+      // purane hits hata do jo window se bahar ho gaye
+      hitTimestamps = hitTimestamps.filter(t => now - t <= HIT_WINDOW_MS);
+      dbgHits.textContent = 'hits in window: ' + hitTimestamps.length + ' / ' + REQUIRED_HITS;
+      if(hitTimestamps.length >= REQUIRED_HITS){
+        hitTimestamps = [];
+        triggerSequence();
+      }
     }
+    lastX=x; lastY=y; lastZ=z;
   }
 
   function spawnSnow(){
