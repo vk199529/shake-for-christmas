@@ -126,6 +126,7 @@
     border-radius:50%;
     background:#fff;
     opacity:0;
+    box-shadow: 0 0 4px 1px rgba(255,255,255,.8);
   }
   .globe-glass.snowing .snowflake{
     animation-name: snowFall;
@@ -135,8 +136,23 @@
   @keyframes snowFall{
     0%{ opacity:0; transform:translateY(0) translateX(0); }
     8%{ opacity:1; }
-    100%{ opacity:.9; transform:translateY(115%) translateX(6px); }
+    100%{ opacity:1; transform:translateY(115%) translateX(6px); }
   }
+
+  .sanity-label{
+    position:absolute;
+    top:6px; left:50%;
+    transform:translateX(-50%);
+    font-size:13px;
+    font-weight:700;
+    color:#7ee787;
+    background:rgba(0,0,0,.55);
+    padding:4px 10px;
+    border-radius:8px;
+    display:none;
+    z-index:5;
+  }
+  .globe-glass.snowing .sanity-label{ display:block; }
 
   .base{
     position:absolute;
@@ -185,6 +201,28 @@
     text-align:left;
   }
   #debugPanel b{ color:var(--gold); }
+
+  #testBtn{
+    margin-top:10px;
+    padding:8px 16px;
+    border-radius:999px;
+    border:1px solid var(--gold);
+    background:transparent;
+    color:var(--gold);
+    font-size:12px;
+    cursor:pointer;
+  }
+
+  /* Force animations even if the phone has "Reduce Motion" turned on,
+     since some browsers silently disable ALL CSS animations in that mode */
+  @media (prefers-reduced-motion: reduce){
+    .globe-wrap.shaking,
+    .globe-glass.snowing .snowflake,
+    .star-top{
+      animation-duration: revert !important;
+      animation-name: revert !important;
+    }
+  }
 </style>
 </head>
 <body>
@@ -195,6 +233,7 @@
 
   <div class="globe-wrap" id="globeWrap">
     <div class="globe-glass" id="globeGlass">
+      <div class="sanity-label">❄️ Snowing...</div>
       <div class="scene">
         <div class="tree big"><span class="star-top">⭐</span><div class="tier"></div><div class="tier t2"></div><div class="tier t3"></div></div>
         <div class="tree small1"><div class="tier"></div><div class="tier t2"></div></div>
@@ -206,6 +245,7 @@
   </div>
 
   <button id="enableBtn">Bewegungssensor aktivieren</button>
+  <button id="testBtn">🧪 Test Snow (manuell auslösen)</button>
   <div class="hint" id="hint"></div>
 </div>
 
@@ -216,6 +256,9 @@
   <div id="dbgSecure">secure context (https): checking...</div>
   <div id="dbgEvents">events received: 0</div>
   <div id="dbgSpeed">last speed: -</div>
+  <div id="dbgTrigger">shake triggers: 0</div>
+  <div id="dbgSnowing">snowing class active: false</div>
+  <div id="dbgReduced">prefers-reduced-motion: checking...</div>
 </div>
 
 <script>
@@ -233,10 +276,17 @@
   const dbgSecure = document.getElementById('dbgSecure');
   const dbgEvents = document.getElementById('dbgEvents');
   const dbgSpeed = document.getElementById('dbgSpeed');
+  const dbgTrigger = document.getElementById('dbgTrigger');
+  const dbgSnowing = document.getElementById('dbgSnowing');
+  const dbgReduced = document.getElementById('dbgReduced');
+  const testBtn = document.getElementById('testBtn');
   let eventCount = 0;
+  let triggerCount = 0;
 
   dbgSupport.textContent = 'devicemotion supported: ' + (typeof DeviceMotionEvent !== 'undefined');
   dbgSecure.textContent = 'secure context (https): ' + window.isSecureContext;
+  const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  dbgReduced.textContent = 'prefers-reduced-motion: ' + reducedMotion + (reducedMotion ? '  ⚠️ ISKO PHONE SETTINGS SE OFF KAREIN' : '');
 
   for(let i=0;i<26;i++){
     const s = document.createElement('div');
@@ -249,15 +299,15 @@
     stage.insertBefore(s, stage.firstChild);
   }
 
-  const FLAKE_COUNT = 45;
+  const FLAKE_COUNT = 35;
   for(let i=0;i<FLAKE_COUNT;i++){
     const f = document.createElement('div');
     f.className='snowflake';
-    const size = Math.random()*3+2;
+    const size = Math.random()*4+6;
     f.style.width=size+'px'; f.style.height=size+'px';
     f.style.left = (5+Math.random()*90)+'%';
-    f.style.animationDuration = (Math.random()*3+3.5)+'s';
-    f.style.animationDelay = (Math.random()*4)+'s';
+    f.style.animationDuration = (Math.random()*2+2.5)+'s';
+    f.style.animationDelay = (Math.random()*3)+'s';
     globeGlass.appendChild(f);
   }
 
@@ -267,21 +317,28 @@
     const now = Date.now();
     if(now < cooldownUntil) return;
     cooldownUntil = now + 3500;
+    triggerCount++;
+    dbgTrigger.textContent = 'shake triggers: ' + triggerCount;
 
     globeWrap.classList.remove('shaking');
     void globeWrap.offsetWidth;
     globeWrap.classList.add('shaking');
 
     globeGlass.classList.add('snowing');
+    dbgSnowing.textContent = 'snowing class active: true';
     headline.style.opacity = '0.4';
     subline.style.opacity = '0.4';
     if(navigator.vibrate) navigator.vibrate([50,30,50]);
 
     setTimeout(()=>{ headline.style.opacity='1'; subline.style.opacity='1'; }, 400);
-    setTimeout(()=>{ globeGlass.classList.remove('snowing'); }, 6000);
+    setTimeout(()=>{
+      globeGlass.classList.remove('snowing');
+      dbgSnowing.textContent = 'snowing class active: false';
+    }, 6000);
   }
 
   globeWrap.addEventListener('click', shakeSnowGlobe);
+  testBtn.addEventListener('click', shakeSnowGlobe);
 
   let lastX=null,lastY=null,lastZ=null,lastTime=0;
   const SHAKE_THRESHOLD = 16;
