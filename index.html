@@ -1,252 +1,261 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="hi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Frohe Weihnachten 🎄</title>
+<title>Shake for Christmas 🎄</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.js"></script>
 <style>
   :root{
-    --navy:#0c1f4a;
-    --navy-deep:#081536;
-    --gold:#f5c623;
-    --white:#ffffff;
+    --bg-dark:#0b1120;
+    --gold:#e8c468;
+    --red:#c0392b;
+    --green:#1e5631;
+    --snow:#ffffff;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html,body{
     height:100%;
-    background: linear-gradient(180deg, var(--navy) 0%, var(--navy-deep) 100%);
-    color:var(--white);
+    background: radial-gradient(circle at 50% 20%, #142238 0%, var(--bg-dark) 70%);
+    color:#f4f4f4;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    overflow:hidden;
+    overflow-x:hidden;
   }
-  .stage{
-    height:100vh;
+  .wrap{
+    min-height:100vh;
     display:flex;
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    position:relative;
-    padding:24px;
     text-align:center;
-    user-select:none;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .bgstar{
-    position:absolute;
-    background:var(--white);
-    border-radius:50%;
-    opacity:.6;
-    animation: twinkleBg 2.5s ease-in-out infinite;
-  }
-  @keyframes twinkleBg{ 0%,100%{opacity:.15;} 50%{opacity:.7;} }
-
-  .headline{
-    font-size: clamp(22px, 6vw, 34px);
-    font-weight:800;
-    color:var(--gold);
-    letter-spacing:.5px;
-    margin-bottom:6px;
-    transition:opacity .5s ease;
-  }
-  .subline{
-    font-size:14px;
-    color:#c9d3ea;
-    margin-bottom:28px;
-    max-width:320px;
-    transition:opacity .5s ease;
-  }
-
-  .globe-wrap{
+    padding:24px;
     position:relative;
-    width:min(78vw,320px);
-    aspect-ratio:1/1;
-    cursor:pointer;
-    filter: drop-shadow(0 10px 25px rgba(0,0,0,.4));
   }
-  .globe-wrap.shaking{
-    animation: shakeGlobe .5s ease-in-out;
-  }
-  @keyframes shakeGlobe{
-    0%,100%{ transform:rotate(0deg) translateX(0); }
-    15%{ transform:rotate(-6deg) translateX(-6px); }
-    30%{ transform:rotate(5deg) translateX(6px); }
-    45%{ transform:rotate(-4deg) translateX(-4px); }
-    60%{ transform:rotate(4deg) translateX(4px); }
-    75%{ transform:rotate(-2deg) translateX(-2px); }
-  }
-  .globe-glass{
-    position:absolute;
-    inset:0;
-    border-radius:50%;
-    background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.25), rgba(255,255,255,.02) 40%),
-                radial-gradient(circle at 60% 70%, #12306e 0%, #0a1c47 70%);
-    border:2px solid rgba(255,255,255,.35);
-    overflow:hidden;
-    box-shadow: inset 0 0 40px rgba(0,0,0,.5), 0 0 25px rgba(245,198,35,.15);
-  }
-  .scene{
-    position:absolute;
-    left:0; right:0; bottom:14%;
-    height:55%;
-  }
-  .ground{
-    position:absolute;
-    left:-10%; right:-10%; bottom:0;
-    height:34%;
-    background: linear-gradient(180deg, #eef4ff 0%, #d7e3f7 100%);
-    border-radius:50% 50% 0 0/60% 60% 0 0;
-  }
-  .tree{
-    position:absolute;
-    bottom:20%;
-    width:0; height:0;
-  }
-  .tree .tier{
-    width:0;height:0;
-    border-left:16px solid transparent;
-    border-right:16px solid transparent;
-    border-bottom:22px solid #1e5b39;
-    margin-bottom:-7px;
-  }
-  .tree .tier.t2{border-left:20px solid transparent; border-right:20px solid transparent; border-bottom:26px solid #226b3f;}
-  .tree .tier.t3{border-left:24px solid transparent; border-right:24px solid transparent; border-bottom:30px solid #277747;}
-  .tree.big{ left:50%; transform:translateX(-50%); bottom:22%; }
-  .tree.small1{ left:22%; transform:scale(.6); bottom:20%; }
-  .tree.small2{ right:18%; left:auto; transform:scale(.5); bottom:20%; }
-  .star-top{
-    position:absolute; top:-30px; left:50%; transform:translateX(-50%);
-    color:var(--gold); font-size:16px;
-    animation: twinkle 1.2s ease-in-out infinite;
-  }
-  @keyframes twinkle{ 0%,100%{opacity:1;} 50%{opacity:.35;} }
-
-  .snowflake{
-    position:absolute;
-    top:-6%;
-    border-radius:50%;
-    background:#fff;
-    opacity:0;
-    box-shadow: 0 0 4px 1px rgba(255,255,255,.8);
-  }
-  .globe-glass.snowing .snowflake{
-    animation-name: snowFall;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-  }
-  @keyframes snowFall{
-    0%{ opacity:0; transform:translateY(0) translateX(0); }
-    8%{ opacity:1; }
-    100%{ opacity:1; transform:translateY(115%) translateX(6px); }
-  }
-
-  .sanity-label{
-    position:absolute;
-    top:6px; left:50%;
-    transform:translateX(-50%);
-    font-size:13px;
+  h1{
+    font-size: clamp(20px, 5vw, 32px);
     font-weight:700;
-    color:#7ee787;
-    background:rgba(0,0,0,.55);
-    padding:4px 10px;
-    border-radius:8px;
-    display:none;
-    z-index:5;
+    letter-spacing:0.5px;
   }
-  .globe-glass.snowing .sanity-label{ display:block; }
-
-  .base{
-    position:absolute;
-    left:50%; bottom:-6%;
-    transform:translateX(-50%);
-    width:60%;
-    height:16%;
-    background: linear-gradient(180deg, #12306e, #081536);
-    border-radius:14px;
-    border:2px solid rgba(245,198,35,.5);
+  p.sub{
+    margin-top:10px;
+    color:#a9b4c9;
+    font-size:14px;
+    max-width:320px;
   }
-
-  .hint{
-    margin-top:26px;
-    font-size:12px;
-    color:#8fa0c9;
-    min-height:16px;
+  .icon-shake{
+    font-size:64px;
+    margin-bottom:14px;
+    animation: idleShake 3.5s ease-in-out infinite;
+  }
+  @keyframes idleShake{
+    0%,100%{transform:rotate(0deg);}
+    5%{transform:rotate(-12deg);}
+    10%{transform:rotate(10deg);}
+    15%{transform:rotate(-8deg);}
+    20%{transform:rotate(0deg);}
   }
   #enableBtn{
-    margin-top:18px;
-    padding:11px 20px;
+    margin-top:22px;
+    padding:12px 22px;
     border-radius:999px;
     border:none;
-    background: linear-gradient(135deg, var(--gold), #c99b1e);
+    background: linear-gradient(135deg, var(--gold), #c99b3a);
     color:#1a1400;
     font-weight:700;
-    font-size:14px;
+    font-size:15px;
     cursor:pointer;
     display:none;
   }
-
+  #status{
+    margin-top:16px;
+    font-size:12px;
+    color:#6c7a94;
+    min-height:16px;
+  }
   #debugPanel{
     position:fixed;
-    left:8px; bottom:8px; right:8px;
-    background:rgba(0,0,0,.6);
-    border:1px solid #223258;
+    left:10px; bottom:10px; right:10px;
+    background:rgba(0,0,0,.65);
+    border:1px solid #2a3855;
     border-radius:10px;
-    padding:8px 10px;
-    font-size:10px;
-    line-height:1.5;
+    padding:10px 12px;
+    font-size:11px;
+    line-height:1.6;
     color:#9fd6a8;
     font-family:monospace;
     z-index:40;
-    max-height:32vh;
+    max-height:38vh;
     overflow-y:auto;
     text-align:left;
   }
-  #debugPanel b{ color:var(--gold); }
+  #debugPanel b{ color:#e8c468; }
 
-  #testBtn{
-    margin-top:10px;
-    padding:8px 16px;
-    border-radius:999px;
-    border:1px solid var(--gold);
-    background:transparent;
+  /* ---------- Christmas overlay ---------- */
+  #xmasOverlay{
+    position:fixed;
+    inset:0;
+    background: radial-gradient(circle at 50% 30%, #0d2b1e 0%, #06140d 80%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:50;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .4s ease;
+    overflow:hidden;
+  }
+  #xmasOverlay.show{
+    opacity:1;
+    pointer-events:auto;
+  }
+  .snow{
+    position:absolute;
+    top:-10px;
+    border-radius:50%;
+    background:var(--snow);
+    opacity:.85;
+    animation-name: fall;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+  @keyframes fall{
+    to{ transform: translateY(110vh) translateX(10px); }
+  }
+  .tree-box{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    z-index:2;
+  }
+  .tree{
+    width:0; height:0;
+    position:relative;
+  }
+  .tier{
+    width:0; height:0;
+    border-left:60px solid transparent;
+    border-right:60px solid transparent;
+    border-bottom:80px solid var(--green);
+    margin-bottom:-22px;
+    filter: drop-shadow(0 0 6px rgba(30,86,49,.6));
+  }
+  .tier.t2{border-left:75px solid transparent; border-right:75px solid transparent; border-bottom:95px solid #226b3d;}
+  .tier.t3{border-left:90px solid transparent; border-right:90px solid transparent; border-bottom:110px solid #2a7a46;}
+  .trunk{
+    width:22px; height:34px;
+    background:#5a3a22;
+    margin-top:-2px;
+  }
+  .star{
+    position:absolute;
+    top:-28px; left:50%;
+    transform:translateX(-50%);
+    font-size:30px;
+    animation: twinkle 1.1s ease-in-out infinite;
+  }
+  @keyframes twinkle{
+    0%,100%{opacity:1; filter:drop-shadow(0 0 4px #ffd76a);}
+    50%{opacity:.4; filter:drop-shadow(0 0 12px #ffd76a);}
+  }
+  .light{
+    position:absolute;
+    width:8px; height:8px;
+    border-radius:50%;
+    animation: blink 1s ease-in-out infinite;
+  }
+  @keyframes blink{
+    0%,100%{opacity:1;}
+    50%{opacity:.25;}
+  }
+  .xmas-text{
+    margin-top:26px;
+    font-size:22px;
+    font-weight:800;
+    letter-spacing:1px;
     color:var(--gold);
-    font-size:12px;
-    cursor:pointer;
+    text-shadow:0 0 14px rgba(232,196,104,.6);
+  }
+  .xmas-sub{
+    margin-top:6px;
+    font-size:13px;
+    color:#cfe8d8;
   }
 
-  /* Force animations even if the phone has "Reduce Motion" turned on,
-     since some browsers silently disable ALL CSS animations in that mode */
-  @media (prefers-reduced-motion: reduce){
-    .globe-wrap.shaking,
-    .globe-glass.snowing .snowflake,
-    .star-top{
-      animation-duration: revert !important;
-      animation-name: revert !important;
-    }
+  /* ---------- Scanner overlay ---------- */
+  #scannerOverlay{
+    position:fixed;
+    inset:0;
+    background:#000;
+    z-index:60;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+  }
+  #scannerOverlay.show{ display:flex; }
+  #video{
+    width:100%;
+    max-width:480px;
+    aspect-ratio: 3/4;
+    object-fit:cover;
+    border-radius:18px;
+  }
+  .scan-frame{
+    position:absolute;
+    width:min(70vw,300px);
+    height:min(70vw,300px);
+    border:3px solid var(--gold);
+    border-radius:16px;
+    box-shadow:0 0 0 2000px rgba(0,0,0,.45);
+    animation: pulseFrame 1.6s ease-in-out infinite;
+  }
+  @keyframes pulseFrame{
+    0%,100%{ box-shadow:0 0 0 2000px rgba(0,0,0,.45), 0 0 12px var(--gold); }
+    50%{ box-shadow:0 0 0 2000px rgba(0,0,0,.45), 0 0 24px var(--gold); }
+  }
+  .scan-label{
+    position:absolute;
+    bottom:70px;
+    color:#fff;
+    font-size:14px;
+    background:rgba(0,0,0,.5);
+    padding:8px 16px;
+    border-radius:999px;
+  }
+  .close-scan{
+    position:absolute;
+    top:24px; right:20px;
+    background:rgba(255,255,255,.12);
+    border:none;
+    color:#fff;
+    width:38px; height:38px;
+    border-radius:50%;
+    font-size:18px;
+    cursor:pointer;
+  }
+  #scanResult{
+    position:absolute;
+    bottom:130px;
+    max-width:85%;
+    background:rgba(20,20,20,.85);
+    color:var(--gold);
+    padding:10px 16px;
+    border-radius:10px;
+    font-size:13px;
+    display:none;
+    word-break:break-all;
   }
 </style>
 </head>
 <body>
 
-<div class="stage" id="stage">
-  <div class="headline" id="headline">Frohe Weihnachten</div>
-  <div class="subline" id="subline">Tippen Sie auf die Kugel oder schütteln Sie Ihr Handy</div>
-
-  <div class="globe-wrap" id="globeWrap">
-    <div class="globe-glass" id="globeGlass">
-      <div class="sanity-label">❄️ Snowing...</div>
-      <div class="scene">
-        <div class="tree big"><span class="star-top">⭐</span><div class="tier"></div><div class="tier t2"></div><div class="tier t3"></div></div>
-        <div class="tree small1"><div class="tier"></div><div class="tier t2"></div></div>
-        <div class="tree small2"><div class="tier"></div><div class="tier t2"></div></div>
-        <div class="ground"></div>
-      </div>
-    </div>
-    <div class="base"></div>
-  </div>
-
-  <button id="enableBtn">Bewegungssensor aktivieren</button>
-  <button id="testBtn">🧪 Test Snow (manuell auslösen)</button>
-  <div class="hint" id="hint"></div>
+<div class="wrap">
+  <div class="icon-shake">📱</div>
+  <h1>Phone ko shake karein</h1>
+  <p class="sub">Shake karte hi Christmas surprise dikhega, uske baad QR scanner khud khul jayega.</p>
+  <button id="enableBtn">Motion Access On Karein</button>
+  <div id="status"></div>
 </div>
 
 <div id="debugPanel">
@@ -255,126 +264,206 @@
   <div id="dbgPermission">permission: n/a</div>
   <div id="dbgSecure">secure context (https): checking...</div>
   <div id="dbgEvents">events received: 0</div>
+  <div id="dbgLast">last x,y,z: -</div>
   <div id="dbgSpeed">last speed: -</div>
-  <div id="dbgTrigger">shake triggers: 0</div>
-  <div id="dbgSnowing">snowing class active: false</div>
-  <div id="dbgReduced">prefers-reduced-motion: checking...</div>
+</div>
+
+<!-- Christmas overlay -->
+<div id="xmasOverlay">
+  <div class="tree-box">
+    <div class="tree">
+      <div class="star">⭐</div>
+      <div class="tier"></div>
+      <div class="tier t2"></div>
+      <div class="tier t3"></div>
+      <div class="trunk" style="margin:0 auto;"></div>
+    </div>
+    <div class="xmas-text">🎄 Merry Christmas! 🎄</div>
+    <div class="xmas-sub">Scanner khul raha hai...</div>
+  </div>
+</div>
+
+<!-- Scanner overlay -->
+<div id="scannerOverlay">
+  <button class="close-scan" id="closeScan">✕</button>
+  <video id="video" playsinline autoplay muted></video>
+  <div class="scan-frame"></div>
+  <div class="scan-label">QR code frame ke andar rakhein</div>
+  <div id="scanResult"></div>
+  <canvas id="canvas" style="display:none;"></canvas>
 </div>
 
 <script>
 (function(){
-  const stage = document.getElementById('stage');
-  const globeWrap = document.getElementById('globeWrap');
-  const globeGlass = document.getElementById('globeGlass');
-  const headline = document.getElementById('headline');
-  const subline = document.getElementById('subline');
-  const hint = document.getElementById('hint');
+  const statusEl = document.getElementById('status');
   const enableBtn = document.getElementById('enableBtn');
+  const xmasOverlay = document.getElementById('xmasOverlay');
+  const scannerOverlay = document.getElementById('scannerOverlay');
+  const closeScan = document.getElementById('closeScan');
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const scanResult = document.getElementById('scanResult');
+
+  let lastX=null, lastY=null, lastZ=null, lastTime=0;
+  const SHAKE_THRESHOLD = 16; // sensitivity: kam karo to zyada sensitive
+  const COOLDOWN_MS = 4000;
+  let lastTrigger = 0;
+  let stream = null;
+  let scanning = false;
+
+  function setStatus(msg){ statusEl.textContent = msg; }
 
   const dbgSupport = document.getElementById('dbgSupport');
   const dbgPermission = document.getElementById('dbgPermission');
   const dbgSecure = document.getElementById('dbgSecure');
   const dbgEvents = document.getElementById('dbgEvents');
+  const dbgLast = document.getElementById('dbgLast');
   const dbgSpeed = document.getElementById('dbgSpeed');
-  const dbgTrigger = document.getElementById('dbgTrigger');
-  const dbgSnowing = document.getElementById('dbgSnowing');
-  const dbgReduced = document.getElementById('dbgReduced');
-  const testBtn = document.getElementById('testBtn');
   let eventCount = 0;
-  let triggerCount = 0;
 
   dbgSupport.textContent = 'devicemotion supported: ' + (typeof DeviceMotionEvent !== 'undefined');
   dbgSecure.textContent = 'secure context (https): ' + window.isSecureContext;
-  const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  dbgReduced.textContent = 'prefers-reduced-motion: ' + reducedMotion + (reducedMotion ? '  ⚠️ ISKO PHONE SETTINGS SE OFF KAREIN' : '');
 
-  for(let i=0;i<26;i++){
-    const s = document.createElement('div');
-    s.className='bgstar';
-    const size = Math.random()*2+1;
-    s.style.width=size+'px'; s.style.height=size+'px';
-    s.style.left = Math.random()*100+'vw';
-    s.style.top = Math.random()*70+'vh';
-    s.style.animationDelay = Math.random()*2.5+'s';
-    stage.insertBefore(s, stage.firstChild);
-  }
-
-  const FLAKE_COUNT = 35;
-  for(let i=0;i<FLAKE_COUNT;i++){
-    const f = document.createElement('div');
-    f.className='snowflake';
-    const size = Math.random()*4+6;
-    f.style.width=size+'px'; f.style.height=size+'px';
-    f.style.left = (5+Math.random()*90)+'%';
-    f.style.animationDuration = (Math.random()*2+2.5)+'s';
-    f.style.animationDelay = (Math.random()*3)+'s';
-    globeGlass.appendChild(f);
-  }
-
-  let cooldownUntil = 0;
-
-  function shakeSnowGlobe(){
+  function triggerSequence(){
     const now = Date.now();
-    if(now < cooldownUntil) return;
-    cooldownUntil = now + 3500;
-    triggerCount++;
-    dbgTrigger.textContent = 'shake triggers: ' + triggerCount;
-
-    globeWrap.classList.remove('shaking');
-    void globeWrap.offsetWidth;
-    globeWrap.classList.add('shaking');
-
-    globeGlass.classList.add('snowing');
-    dbgSnowing.textContent = 'snowing class active: true';
-    headline.style.opacity = '0.4';
-    subline.style.opacity = '0.4';
-    if(navigator.vibrate) navigator.vibrate([50,30,50]);
-
-    setTimeout(()=>{ headline.style.opacity='1'; subline.style.opacity='1'; }, 400);
-    setTimeout(()=>{
-      globeGlass.classList.remove('snowing');
-      dbgSnowing.textContent = 'snowing class active: false';
-    }, 6000);
+    if(now - lastTrigger < COOLDOWN_MS) return;
+    lastTrigger = now;
+    if(navigator.vibrate) navigator.vibrate([60,40,60]);
+    showChristmas();
   }
-
-  globeWrap.addEventListener('click', shakeSnowGlobe);
-  testBtn.addEventListener('click', shakeSnowGlobe);
-
-  let lastX=null,lastY=null,lastZ=null,lastTime=0;
-  const SHAKE_THRESHOLD = 16;
 
   function handleMotion(event){
     eventCount++;
     dbgEvents.textContent = 'events received: ' + eventCount;
+
     const acc = event.accelerationIncludingGravity || event.acceleration;
-    if(!acc || acc.x==null) return;
+    if(!acc || acc.x===null || acc.x===undefined){
+      dbgLast.textContent = 'last x,y,z: no data in this event';
+      return;
+    }
     const {x,y,z} = acc;
+    dbgLast.textContent = 'last x,y,z: ' + x.toFixed(1) + ', ' + y.toFixed(1) + ', ' + z.toFixed(1);
     const currentTime = Date.now();
-    if(lastTime && (currentTime-lastTime) > 100){
-      const diffTime = currentTime-lastTime;
-      const speed = Math.abs(x+y+z-lastX-lastY-lastZ)/diffTime*10000;
-      dbgSpeed.textContent = 'last speed: ' + speed.toFixed(1) + ' (threshold '+SHAKE_THRESHOLD+')';
-      if(speed > SHAKE_THRESHOLD) shakeSnowGlobe();
-      lastX=x;lastY=y;lastZ=z;lastTime=currentTime;
+    if(lastTime && (currentTime - lastTime) > 100){
+      const diffTime = currentTime - lastTime;
+      const speed = Math.abs(x+y+z-lastX-lastY-lastZ) / diffTime * 10000;
+      dbgSpeed.textContent = 'last speed: ' + speed.toFixed(1) + ' (threshold ' + SHAKE_THRESHOLD + ')';
+      if(speed > SHAKE_THRESHOLD){
+        triggerSequence();
+      }
+      lastX=x; lastY=y; lastZ=z; lastTime=currentTime;
     } else if(!lastTime){
-      lastX=x;lastY=y;lastZ=z;lastTime=currentTime;
+      lastX=x; lastY=y; lastZ=z; lastTime=currentTime;
     }
   }
 
-  function startListening(){
-    window.addEventListener('devicemotion', handleMotion);
-    hint.textContent = 'Bewegungssensor aktiv — schütteln Sie Ihr Handy.';
-    setTimeout(()=>{
-      if(eventCount===0){
-        hint.textContent = '⚠️ Kein Sensor-Signal erkannt — bitte über HTTPS öffnen, nicht in der Vorschau.';
-      }
-    },1500);
+  function spawnSnow(){
+    xmasOverlay.querySelectorAll('.snow').forEach(el=>el.remove());
+    const count = 40;
+    for(let i=0;i<count;i++){
+      const flake = document.createElement('div');
+      flake.className = 'snow';
+      const size = Math.random()*5+3;
+      flake.style.width = size+'px';
+      flake.style.height = size+'px';
+      flake.style.left = Math.random()*100+'vw';
+      const duration = Math.random()*3+3;
+      flake.style.animationDuration = duration+'s';
+      flake.style.animationDelay = (Math.random()*2)+'s';
+      xmasOverlay.appendChild(flake);
+    }
   }
 
+  function spawnLights(){
+    document.querySelectorAll('.light').forEach(el=>el.remove());
+    const colors = ['#ff4d4d','#ffd76a','#4dd0ff','#7dff7d','#ff8ad8'];
+    document.querySelectorAll('.tier').forEach((tier,ti)=>{
+      for(let i=0;i<4;i++){
+        const light = document.createElement('div');
+        light.className='light';
+        light.style.background = colors[Math.floor(Math.random()*colors.length)];
+        light.style.left = (20 + Math.random()*60) + '%';
+        light.style.top = (10 + Math.random()*70) + '%';
+        light.style.animationDelay = (Math.random()*1)+'s';
+        tier.appendChild(light);
+      }
+    });
+  }
+
+  function showChristmas(){
+    spawnSnow();
+    spawnLights();
+    xmasOverlay.classList.add('show');
+    setTimeout(()=>{
+      xmasOverlay.classList.remove('show');
+      openScanner();
+    }, 2600);
+  }
+
+  async function openScanner(){
+    scannerOverlay.classList.add('show');
+    scanResult.style.display='none';
+    try{
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' }
+      });
+      video.srcObject = stream;
+      await video.play();
+      scanning = true;
+      requestAnimationFrame(scanLoop);
+    }catch(err){
+      setStatus('Camera access nahi mila: ' + err.message);
+      scanResult.style.display='block';
+      scanResult.textContent = 'Camera permission allow karein aur dobara try karein.';
+    }
+  }
+
+  function scanLoop(){
+    if(!scanning) return;
+    if(video.readyState === video.HAVE_ENOUGH_DATA){
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+      const code = jsQR(imageData.data, imageData.width, imageData.height);
+      if(code && code.data){
+        scanResult.style.display='block';
+        scanResult.textContent = 'Result: ' + code.data;
+        if(navigator.vibrate) navigator.vibrate(80);
+      }
+    }
+    requestAnimationFrame(scanLoop);
+  }
+
+  function stopScanner(){
+    scanning = false;
+    scannerOverlay.classList.remove('show');
+    if(stream){
+      stream.getTracks().forEach(t=>t.stop());
+      stream = null;
+    }
+  }
+
+  closeScan.addEventListener('click', stopScanner);
+
+  function startListening(){
+    window.addEventListener('devicemotion', handleMotion);
+    setStatus('Motion sensor active — ab shake karke test karein.');
+    // agar 1.5 sec mein koi event na aaye, to warn karo (iframe/blocked case)
+    setTimeout(()=>{
+      if(eventCount === 0){
+        dbgEvents.textContent = 'events received: 0  ⚠️ koi event nahi mila';
+        setStatus('⚠️ Koi motion event nahi mil raha. Neeche debug panel dekhein — ho sakta hai ye HTTPS pe host nahi hai ya iframe/preview mein block ho raha ho.');
+      }
+    }, 1500);
+  }
+
+  // iOS 13+ needs explicit permission via a user gesture
   if(typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function'){
     dbgPermission.textContent = 'permission: requestPermission() available (iOS 13+)';
     enableBtn.style.display='inline-block';
-    hint.textContent = 'iOS: Bitte Button drücken, um Bewegungssensor zu erlauben.';
+    setStatus('iOS: neeche button dabakar motion access on karein.');
     enableBtn.addEventListener('click', async ()=>{
       try{
         const res = await DeviceMotionEvent.requestPermission();
@@ -383,19 +472,30 @@
           enableBtn.style.display='none';
           startListening();
         } else {
-          hint.textContent = 'Zugriff verweigert. In den Safari-Einstellungen erlauben.';
+          setStatus('Permission deny hui. Phone Settings > Safari > Motion & Orientation Access se allow karein.');
         }
       }catch(e){
-        hint.textContent = 'Fehler: ' + e.message;
+        setStatus('Error: ' + e.message);
+        dbgPermission.textContent = 'permission error: ' + e.message;
       }
     });
   } else if(window.DeviceMotionEvent){
-    dbgPermission.textContent = 'permission: not required';
+    dbgPermission.textContent = 'permission: not required on this browser';
     startListening();
   } else {
-    dbgPermission.textContent = 'permission: unsupported';
-    hint.textContent = 'Bewegungssensor wird hier nicht unterstützt — einfach antippen.';
+    dbgPermission.textContent = 'permission: DeviceMotionEvent unsupported';
+    setStatus('Is browser mein motion sensor support nahi hai.');
   }
+
+  // Testing helper for desktop (no accelerometer): double-tap anywhere with 2 fingers... 
+  // simplest: click the shake icon 3 times fast to simulate
+  let clickCount=0, clickTimer=null;
+  document.querySelector('.icon-shake').addEventListener('click', ()=>{
+    clickCount++;
+    clearTimeout(clickTimer);
+    clickTimer=setTimeout(()=>clickCount=0, 700);
+    if(clickCount>=3){ clickCount=0; triggerSequence(); }
+  });
 })();
 </script>
 
