@@ -192,23 +192,19 @@
   }
   #status{ margin-top:14px; font-size:12px; color:#8fa0c9; min-height:16px; max-width:280px; }
 
-  /* ---------- Christmas (shake result) overlay — reuses same globe styling ---------- */
+  /* ---------- Christmas (shake result) overlay — plays uploaded video ---------- */
   #xmasOverlay{
     position:fixed; inset:0;
-    background: var(--navy);
-    display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+    background: #000;
+    display:flex; align-items:center; justify-content:center;
     z-index:50; opacity:0; pointer-events:none; transition:opacity .4s ease; overflow:hidden;
-    padding:70px 24px 40px;
   }
   #xmasOverlay.show{ opacity:1; pointer-events:auto; }
-  .crane{
-    position:absolute;
-    top:2%; right:18%;
-    width:34%;
-    opacity:.9;
-    z-index:3;
-    transform:scale(.62);
-    transform-origin:100% 100%;
+  .xmas-video{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
   }
 
   /* ---------- Scanner (static image) overlay ---------- */
@@ -261,28 +257,7 @@
 
 <!-- Christmas overlay (shown after shake) -->
 <div id="xmasOverlay">
-  <div class="script-text">Merry<br>Christmas!</div>
-
-  <div class="globe-shell">
-    <div class="globe-wrap" id="globeWrap">
-      <div class="globe-glass" id="globeGlass">
-        <svg class="crane" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <rect x="46" y="20" width="4" height="60" fill="#f5c623"/>
-          <line x1="48" y1="22" x2="10" y2="30" stroke="#f5c623" stroke-width="3"/>
-          <line x1="48" y1="22" x2="70" y2="26" stroke="#f5c623" stroke-width="3"/>
-          <line x1="10" y1="30" x2="10" y2="40" stroke="#f5c623" stroke-width="2"/>
-          <rect x="40" y="78" width="20" height="6" fill="#f5c623"/>
-        </svg>
-        <div class="tree-scene">
-          <div class="tree short"><div class="tier"></div><div class="tier t2"></div><div class="trunk"></div></div>
-          <div class="tree tall"><span class="star">⭐</span><div class="tier"></div><div class="tier t2"></div><div class="tier t3"></div><div class="trunk"></div></div>
-          <div class="tree short"><div class="tier"></div><div class="tier t2"></div><div class="trunk"></div></div>
-        </div>
-        <div class="snowdrift"></div>
-      </div>
-    </div>
-    <div class="globe-base"><div class="b1">ÖSTU</div><div class="b2">STETTIN</div></div>
-  </div>
+  <video id="xmasVideo" class="xmas-video" src="christmas.mp4" muted playsinline preload="auto"></video>
 </div>
 
 <!-- Scanner (static image) overlay -->
@@ -319,6 +294,7 @@
   const enableBtn = document.getElementById('enableBtn');
   const stage = document.getElementById('stage');
   const xmasOverlay = document.getElementById('xmasOverlay');
+  const xmasVideo = document.getElementById('xmasVideo');
   const scannerOverlay = document.getElementById('scannerOverlay');
   const closeScan = document.getElementById('closeScan');
 
@@ -391,17 +367,24 @@
   setInterval(()=>spawnSnow('idleGlobeGlass'), 4000);
 
   function showChristmas(){
-    spawnSnow('globeGlass');
     xmasOverlay.classList.add('show');
-    const globeWrapEl = document.getElementById('globeWrap');
-    globeWrapEl.classList.remove('wobble');
-    void globeWrapEl.offsetWidth;
-    globeWrapEl.classList.add('wobble');
-    setTimeout(()=>{
-      xmasOverlay.classList.remove('show');
-      showScanner();
-    }, 3600);
+    xmasVideo.currentTime = 0;
+    const playPromise = xmasVideo.play();
+    if(playPromise && playPromise.catch){
+      playPromise.catch(()=>{
+        // agar autoplay block ho jaye kisi wajah se, phir bhi thodi der baad scanner dikha do
+        setTimeout(finishChristmas, 3000);
+      });
+    }
   }
+
+  function finishChristmas(){
+    xmasOverlay.classList.remove('show');
+    xmasVideo.pause();
+    showScanner();
+  }
+
+  xmasVideo.addEventListener('ended', finishChristmas);
 
   function showScanner(){ scannerOverlay.classList.add('show'); }
   function closeScanner(){ scannerOverlay.classList.remove('show'); }
