@@ -3,99 +3,114 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shake for Christmas 🎄</title>
+<title>ÖSTU STETTIN — Frohe Weihnachten 🎄</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg-dark:#0b1120;
-    --gold:#e8c468;
-    --green:#1e5631;
-    --snow:#ffffff;
-    --navy:#0c1f4a;
+    --navy:#0b1a3f;
+    --navy-deep:#081434;
+    --gold:#f5c623;
+    --white:#ffffff;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html,body{
     height:100%;
-    background: radial-gradient(circle at 50% 20%, #142238 0%, var(--bg-dark) 70%);
-    color:#f4f4f4;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--navy);
+    color:var(--white);
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
     overflow-x:hidden;
   }
-  .wrap{
+
+  /* ---------- shared: brand logo ---------- */
+  .brand-logo{
+    position:fixed;
+    top:18px; left:18px;
+    display:flex;
+    align-items:center;
+    gap:7px;
+    z-index:80;
+  }
+  .brand-logo .mark{
+    width:22px; height:22px;
+    border-radius:50%;
+    border:2px solid var(--gold);
+    position:relative;
+    flex-shrink:0;
+  }
+  .brand-logo .mark::before, .brand-logo .mark::after{
+    content:'';
+    position:absolute;
+    background:var(--gold);
+  }
+  .brand-logo .mark::before{ left:2px; right:2px; top:50%; height:1.5px; transform:translateY(-50%); }
+  .brand-logo .mark::after{ top:2px; bottom:2px; left:50%; width:1.5px; transform:translateX(-50%); }
+  .brand-logo .text{
+    font-family:'Poppins', sans-serif;
+    font-weight:800;
+    font-size:12px;
+    line-height:1.15;
+    letter-spacing:.5px;
+    color:var(--gold);
+    text-align:left;
+  }
+
+  /* ---------- Idle screen ---------- */
+  .stage{
     min-height:100vh;
     display:flex;
     flex-direction:column;
     align-items:center;
     justify-content:center;
     text-align:center;
-    padding:24px;
+    padding:70px 24px 40px;
     position:relative;
   }
-  h1{ font-size: clamp(20px, 5vw, 32px); font-weight:700; letter-spacing:0.5px; }
-  p.sub{ margin-top:10px; color:#a9b4c9; font-size:14px; max-width:320px; }
-  .icon-shake{
-    font-size:64px;
-    margin-bottom:14px;
-    animation: idleShake 3.5s ease-in-out infinite;
+  .bgstar{
+    position:absolute;
+    background:var(--white);
+    border-radius:50%;
+    opacity:.5;
+    animation: twinkleBg 2.6s ease-in-out infinite;
   }
-  @keyframes idleShake{
-    0%,100%{transform:rotate(0deg);}
-    5%{transform:rotate(-12deg);}
-    10%{transform:rotate(10deg);}
-    15%{transform:rotate(-8deg);}
-    20%{transform:rotate(0deg);}
-  }
-  #enableBtn{
-    margin-top:22px; padding:12px 22px; border-radius:999px; border:none;
-    background: linear-gradient(135deg, var(--gold), #c99b3a);
-    color:#1a1400; font-weight:700; font-size:15px; cursor:pointer; display:none;
-  }
-  #status{ margin-top:16px; font-size:12px; color:#6c7a94; min-height:16px; }
+  @keyframes twinkleBg{ 0%,100%{opacity:.12;} 50%{opacity:.6;} }
 
-  /* ---------- Christmas overlay ---------- */
-  #xmasOverlay{
-    position:fixed; inset:0;
-    background: radial-gradient(circle at 50% 30%, #0d2b1e 0%, #06140d 80%);
-    display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
-    z-index:50; opacity:0; pointer-events:none; transition:opacity .4s ease; overflow:hidden;
+  .script-text{
+    font-family:'Caveat', cursive;
+    font-weight:700;
+    font-size: clamp(34px, 9vw, 50px);
+    color:var(--gold);
+    line-height:1.05;
+    transform:rotate(-2deg);
+    margin-bottom:22px;
+    text-shadow:0 0 18px rgba(245,198,35,.25);
   }
-  #xmasOverlay.show{ opacity:1; pointer-events:auto; }
-  .snow{
-    position:absolute; top:-10px; border-radius:50%; background:var(--snow); opacity:.85;
-    animation-name: fall; animation-timing-function: linear; animation-iteration-count: infinite;
-  }
-  @keyframes fall{ to{ transform: translateY(110vh) translateX(10px); } }
-  .tree-box{ position:relative; display:flex; flex-direction:column; align-items:center; z-index:2; }
-  .tree{ width:0; height:0; position:relative; }
-  .tier{
-    width:0; height:0; border-left:60px solid transparent; border-right:60px solid transparent;
-    border-bottom:80px solid var(--green); margin-bottom:-22px;
-    filter: drop-shadow(0 0 6px rgba(30,86,49,.6));
-  }
-  .tier.t2{border-left:75px solid transparent; border-right:75px solid transparent; border-bottom:95px solid #226b3d;}
-  .tier.t3{border-left:90px solid transparent; border-right:90px solid transparent; border-bottom:110px solid #2a7a46;}
-  .trunk{ width:22px; height:34px; background:#5a3a22; margin-top:-2px; }
-  .star{
-    position:absolute; top:-28px; left:50%; transform:translateX(-50%); font-size:30px;
-    animation: twinkle 1.1s ease-in-out infinite;
-  }
-  @keyframes twinkle{
-    0%,100%{opacity:1; filter:drop-shadow(0 0 4px #ffd76a);}
-    50%{opacity:.4; filter:drop-shadow(0 0 12px #ffd76a);}
-  }
-  .light{ position:absolute; width:8px; height:8px; border-radius:50%; animation: blink 1s ease-in-out infinite; }
-  @keyframes blink{ 0%,100%{opacity:1;} 50%{opacity:.25;} }
 
-  /* ---------- Snow globe glass wrapper ---------- */
+  .globe-shell{
+    position:relative;
+    width:min(64vw,240px);
+  }
+  .motion-arc{
+    position:absolute;
+    top:20%;
+    font-size:26px;
+    color:var(--gold);
+    opacity:.85;
+    font-weight:700;
+    animation: arcPulse 1.4s ease-in-out infinite;
+  }
+  .motion-arc.left{ left:-26px; transform:scaleX(-1) rotate(-8deg); }
+  .motion-arc.right{ right:-26px; transform:rotate(8deg); }
+  @keyframes arcPulse{ 0%,100%{opacity:.3;} 50%{opacity:.9;} }
+
   .globe-wrap{
     position:relative;
-    width:min(70vw,270px);
+    width:100%;
     aspect-ratio:1/1;
-    z-index:2;
     filter: drop-shadow(0 12px 22px rgba(0,0,0,.45));
   }
-  .globe-wrap.wobble{
-    animation: globeWobble .6s ease-in-out;
-  }
+  .globe-wrap.wobble{ animation: globeWobble .6s ease-in-out; }
   @keyframes globeWobble{
     0%,100%{ transform:rotate(0deg) translateX(0); }
     15%{ transform:rotate(-5deg) translateX(-5px); }
@@ -104,31 +119,54 @@
     75%{ transform:rotate(2deg) translateX(2px); }
   }
   .globe-glass{
-    position:absolute;
-    inset:0;
-    border-radius:50%;
+    position:absolute; inset:0; border-radius:50%;
     background: radial-gradient(circle at 35% 28%, rgba(255,255,255,.28), rgba(255,255,255,.02) 42%),
                 radial-gradient(circle at 60% 75%, #123064 0%, #081736 75%);
     border:2px solid rgba(255,255,255,.4);
     overflow:hidden;
     box-shadow: inset 0 0 36px rgba(0,0,0,.55), 0 0 22px rgba(245,198,35,.15);
   }
-  .globe-glass .tree-box{
+  .tree-scene{
     position:absolute;
-    left:50%; bottom:16%;
+    left:50%; bottom:6%;
     transform:translateX(-50%) scale(.62);
+    transform-origin:50% 100%;
     z-index:2;
+    display:flex;
+    align-items:flex-end;
+    gap:-6px;
+  }
+  .tree{ width:0; height:0; position:relative; margin:0 -4px; }
+  .tree.tall{ transform: translateY(0); }
+  .tree.short{ transform: translateY(22px) scale(.72); }
+  .tier{
+    width:0; height:0; border-left:34px solid transparent; border-right:34px solid transparent;
+    border-bottom:46px solid #1e5b39; margin-bottom:-13px;
+    filter: drop-shadow(0 0 5px rgba(30,86,49,.5));
+  }
+  .tier.t2{border-left:42px solid transparent; border-right:42px solid transparent; border-bottom:54px solid #226b3f;}
+  .tier.t3{border-left:50px solid transparent; border-right:50px solid transparent; border-bottom:62px solid #277747;}
+  .trunk{ width:12px; height:18px; background:#5a3a22; margin:-2px auto 0; }
+  .star{
+    position:absolute; top:-16px; left:50%; transform:translateX(-50%); font-size:18px;
+    animation: twinkle 1.1s ease-in-out infinite;
+  }
+  @keyframes twinkle{
+    0%,100%{opacity:1; filter:drop-shadow(0 0 4px #ffd76a);}
+    50%{opacity:.4; filter:drop-shadow(0 0 10px #ffd76a);}
+  }
+  .snowdrift{
+    position:absolute;
+    left:-14%; right:-14%; bottom:2%;
+    height:26%;
+    background: linear-gradient(180deg, #eef4ff 0%, #d7e3f7 100%);
+    border-radius:50% 50% 0 0/60% 60% 0 0;
+    z-index:1;
   }
   .globe-flake{
-    position:absolute;
-    top:-6%;
-    border-radius:50%;
-    background:#fff;
-    opacity:0;
+    position:absolute; top:-6%; border-radius:50%; background:#fff; opacity:0;
     box-shadow:0 0 4px 1px rgba(255,255,255,.7);
-    animation-name: globeSnowFall;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
+    animation-name: globeSnowFall; animation-timing-function: linear; animation-iteration-count: infinite;
   }
   @keyframes globeSnowFall{
     0%{ opacity:0; transform:translateY(0) translateX(0); }
@@ -136,43 +174,53 @@
     100%{ opacity:1; transform:translateY(120%) translateX(6px); }
   }
   .globe-base{
-    position:absolute;
-    left:50%; bottom:-7%;
-    transform:translateX(-50%);
-    width:62%;
-    height:16%;
-    background: linear-gradient(180deg, #12306e, #071230);
+    position:absolute; left:50%; bottom:-8%; transform:translateX(-50%);
+    width:64%; height:17%;
+    background: linear-gradient(180deg, #123064, #071230);
     border-radius:12px;
-    border:2px solid rgba(245,198,35,.55);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:10px;
-    font-weight:800;
-    letter-spacing:1px;
-    color:var(--gold);
+    border:2px solid var(--gold);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    line-height:1.15;
   }
-  .xmas-text{
-    margin-top:34px; font-size:22px; font-weight:800; letter-spacing:1px;
-    color:var(--gold); text-shadow:0 0 14px rgba(232,196,104,.6);
+  .globe-base .b1{ font-size:9px; font-weight:800; letter-spacing:1.5px; color:var(--gold); }
+  .globe-base .b2{ font-size:8px; font-weight:700; letter-spacing:1px; color:var(--white); }
+
+  #enableBtn{
+    margin-top:26px; padding:11px 22px; border-radius:999px; border:none;
+    background: linear-gradient(135deg, var(--gold), #c99b1e);
+    color:#1a1400; font-weight:700; font-size:14px; cursor:pointer; display:none;
   }
-  .xmas-sub{ margin-top:6px; font-size:13px; color:#cfe8d8; }
+  #status{ margin-top:14px; font-size:12px; color:#8fa0c9; min-height:16px; max-width:280px; }
+
+  /* ---------- Christmas (shake result) overlay — reuses same globe styling ---------- */
+  #xmasOverlay{
+    position:fixed; inset:0;
+    background: var(--navy);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+    z-index:50; opacity:0; pointer-events:none; transition:opacity .4s ease; overflow:hidden;
+    padding:70px 24px 40px;
+  }
+  #xmasOverlay.show{ opacity:1; pointer-events:auto; }
+  .crane{
+    position:absolute;
+    top:2%; right:18%;
+    width:34%;
+    opacity:.9;
+    z-index:3;
+    transform:scale(.62);
+    transform-origin:100% 100%;
+  }
 
   /* ---------- Scanner (static image) overlay ---------- */
   #scannerOverlay{
     position:fixed; inset:0;
-    background: linear-gradient(180deg, var(--navy), #060f28);
+    background: var(--navy);
     z-index:60; display:none; align-items:center; justify-content:center; flex-direction:column;
     opacity:0; transition:opacity .4s ease;
   }
   #scannerOverlay.show{ display:flex; opacity:1; }
-  .scanner-graphic{
-    width:min(72vw,280px);
-    aspect-ratio:1/1;
-  }
-  .scanner-caption{
-    margin-top:22px; font-size:18px; font-weight:700; color:var(--gold);
-  }
+  .scanner-graphic{ width:min(72vw,280px); aspect-ratio:1/1; }
+  .scanner-caption{ margin-top:22px; font-size:18px; font-weight:700; color:var(--gold); }
   .scanner-sub{ margin-top:6px; font-size:13px; color:#c9d3ea; max-width:280px; text-align:center; }
   .close-scan{
     position:absolute; top:24px; right:20px; background:rgba(255,255,255,.12);
@@ -182,32 +230,59 @@
 </head>
 <body>
 
-<div class="wrap">
-  <div class="icon-shake">📱</div>
-  <h1>Phone ko shake karein</h1>
-  <p class="sub">Shake karte hi Christmas surprise dikhega, uske baad scanner image dikhegi.</p>
+<div class="brand-logo">
+  <div class="mark"></div>
+  <div class="text">ÖSTU<br>STETTIN</div>
+</div>
+
+<!-- Idle screen -->
+<div class="stage" id="stage">
+  <div class="script-text">Shake,<br>shake me!</div>
+
+  <div class="globe-shell">
+    <div class="motion-arc left">))</div>
+    <div class="motion-arc right">((</div>
+    <div class="globe-wrap" id="idleGlobeWrap">
+      <div class="globe-glass" id="idleGlobeGlass">
+        <div class="tree-scene">
+          <div class="tree short"><div class="tier"></div><div class="tier t2"></div><div class="trunk"></div></div>
+          <div class="tree tall"><span class="star">⭐</span><div class="tier"></div><div class="tier t2"></div><div class="tier t3"></div><div class="trunk"></div></div>
+          <div class="tree short"><div class="tier"></div><div class="tier t2"></div><div class="trunk"></div></div>
+        </div>
+        <div class="snowdrift"></div>
+      </div>
+    </div>
+    <div class="globe-base"><div class="b1">ÖSTU</div><div class="b2">STETTIN</div></div>
+  </div>
+
   <button id="enableBtn">Motion Access On Karein</button>
   <div id="status"></div>
 </div>
 
-<!-- Christmas overlay -->
+<!-- Christmas overlay (shown after shake) -->
 <div id="xmasOverlay">
-  <div class="globe-wrap">
-    <div class="globe-glass" id="globeGlass">
-      <div class="tree-box">
-        <div class="tree">
-          <div class="star">⭐</div>
-          <div class="tier"></div>
-          <div class="tier t2"></div>
-          <div class="tier t3"></div>
-          <div class="trunk" style="margin:0 auto;"></div>
+  <div class="script-text">Merry<br>Christmas!</div>
+
+  <div class="globe-shell">
+    <div class="globe-wrap" id="globeWrap">
+      <div class="globe-glass" id="globeGlass">
+        <svg class="crane" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <rect x="46" y="20" width="4" height="60" fill="#f5c623"/>
+          <line x1="48" y1="22" x2="10" y2="30" stroke="#f5c623" stroke-width="3"/>
+          <line x1="48" y1="22" x2="70" y2="26" stroke="#f5c623" stroke-width="3"/>
+          <line x1="10" y1="30" x2="10" y2="40" stroke="#f5c623" stroke-width="2"/>
+          <rect x="40" y="78" width="20" height="6" fill="#f5c623"/>
+        </svg>
+        <div class="tree-scene">
+          <div class="tree short"><div class="tier"></div><div class="tier t2"></div><div class="trunk"></div></div>
+          <div class="tree tall"><span class="star">⭐</span><div class="tier"></div><div class="tier t2"></div><div class="tier t3"></div><div class="trunk"></div></div>
+          <div class="tree short"><div class="tier"></div><div class="tier t2"></div><div class="trunk"></div></div>
         </div>
+        <div class="snowdrift"></div>
       </div>
     </div>
-    <div class="globe-base">FROHE WEIHNACHTEN</div>
+    <div class="globe-base"><div class="b1">ÖSTU</div><div class="b2">STETTIN</div></div>
   </div>
-  <div class="xmas-text">🎄 Merry Christmas! 🎄</div>
-  <div class="xmas-sub">Ek pal rukiye...</div>
 </div>
 
 <!-- Scanner (static image) overlay -->
@@ -215,12 +290,10 @@
   <button class="close-scan" id="closeScan">✕</button>
   <svg class="scanner-graphic" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
     <rect x="10" y="10" width="180" height="180" rx="16" fill="#0f2a5c" stroke="#f5c623" stroke-width="2"/>
-    <!-- corner brackets -->
     <path d="M28 50 V32 a4 4 0 0 1 4 -4 h18" stroke="#f5c623" stroke-width="5" fill="none" stroke-linecap="round"/>
     <path d="M172 50 V32 a4 4 0 0 0 -4 -4 h-18" stroke="#f5c623" stroke-width="5" fill="none" stroke-linecap="round"/>
     <path d="M28 150 V168 a4 4 0 0 0 4 4 h18" stroke="#f5c623" stroke-width="5" fill="none" stroke-linecap="round"/>
     <path d="M172 150 V168 a4 4 0 0 1 -4 4 h-18" stroke="#f5c623" stroke-width="5" fill="none" stroke-linecap="round"/>
-    <!-- QR-style icon -->
     <g fill="#ffffff">
       <rect x="55" y="55" width="26" height="26" rx="3"/>
       <rect x="119" y="55" width="26" height="26" rx="3"/>
@@ -234,7 +307,6 @@
       <rect x="119" y="119" width="26" height="10"/>
       <rect x="119" y="135" width="10" height="10"/>
     </g>
-    <!-- scan line -->
     <rect x="24" y="99" width="152" height="3" fill="#f5c623" opacity="0.9"/>
   </svg>
   <div class="scanner-caption">Scan Me</div>
@@ -245,19 +317,32 @@
 (function(){
   const statusEl = document.getElementById('status');
   const enableBtn = document.getElementById('enableBtn');
+  const stage = document.getElementById('stage');
   const xmasOverlay = document.getElementById('xmasOverlay');
   const scannerOverlay = document.getElementById('scannerOverlay');
   const closeScan = document.getElementById('closeScan');
 
   let lastX=null, lastY=null, lastZ=null;
-  const MAGNITUDE_THRESHOLD = 22;   // gravity baseline ~9.8; badhao to kam sensitive, ghatao to zyada sensitive
-  const REQUIRED_HITS = 3;          // kitni baar threshold cross ho window ke andar tabhi "real shake" mana jayega
-  const HIT_WINDOW_MS = 1000;       // is window ke andar hits count hote hain
+  const MAGNITUDE_THRESHOLD = 22;
+  const REQUIRED_HITS = 3;
+  const HIT_WINDOW_MS = 1000;
   const COOLDOWN_MS = 6000;
   let lastTrigger = 0;
   let hitTimestamps = [];
 
   function setStatus(msg){ statusEl.textContent = msg; }
+
+  // random background stars on idle stage
+  for(let i=0;i<22;i++){
+    const s = document.createElement('div');
+    s.className='bgstar';
+    const size = Math.random()*2+1;
+    s.style.width=size+'px'; s.style.height=size+'px';
+    s.style.left = Math.random()*100+'vw';
+    s.style.top = Math.random()*80+'vh';
+    s.style.animationDelay = Math.random()*2.5+'s';
+    stage.appendChild(s);
+  }
 
   function triggerSequence(){
     const now = Date.now();
@@ -271,13 +356,10 @@
     const acc = event.accelerationIncludingGravity || event.acceleration;
     if(!acc || acc.x===null || acc.x===undefined) return;
     const {x,y,z} = acc;
-
     const magnitude = Math.sqrt(x*x + y*y + z*z);
-
     if(magnitude > MAGNITUDE_THRESHOLD){
       const now = Date.now();
       hitTimestamps.push(now);
-      // purane hits hata do jo window se bahar ho gaye
       hitTimestamps = hitTimestamps.filter(t => now - t <= HIT_WINDOW_MS);
       if(hitTimestamps.length >= REQUIRED_HITS){
         hitTimestamps = [];
@@ -287,10 +369,10 @@
     lastX=x; lastY=y; lastZ=z;
   }
 
-  function spawnSnow(){
-    const globeGlass = document.getElementById('globeGlass');
-    globeGlass.querySelectorAll('.globe-flake').forEach(el=>el.remove());
-    const count = 35;
+  function spawnSnow(containerId){
+    const glass = document.getElementById(containerId);
+    glass.querySelectorAll('.globe-flake').forEach(el=>el.remove());
+    const count = 30;
     for(let i=0;i<count;i++){
       const flake = document.createElement('div');
       flake.className = 'globe-flake';
@@ -298,50 +380,31 @@
       flake.style.width = size+'px';
       flake.style.height = size+'px';
       flake.style.left = (5+Math.random()*90)+'%';
-      flake.style.animationDuration = (Math.random()*2.5+3)+'s';
-      flake.style.animationDelay = (Math.random()*3)+'s';
-      globeGlass.appendChild(flake);
+      flake.style.animationDuration = (Math.random()*1.5+2)+'s';
+      flake.style.animationDelay = (Math.random()*0.8)+'s';
+      glass.appendChild(flake);
     }
   }
 
-  function spawnLights(){
-    document.querySelectorAll('.light').forEach(el=>el.remove());
-    const colors = ['#ff4d4d','#ffd76a','#4dd0ff','#7dff7d','#ff8ad8'];
-    document.querySelectorAll('.tier').forEach((tier)=>{
-      for(let i=0;i<4;i++){
-        const light = document.createElement('div');
-        light.className='light';
-        light.style.background = colors[Math.floor(Math.random()*colors.length)];
-        light.style.left = (20 + Math.random()*60) + '%';
-        light.style.top = (10 + Math.random()*70) + '%';
-        light.style.animationDelay = (Math.random()*1)+'s';
-        tier.appendChild(light);
-      }
-    });
-  }
+  // idle globe: gentle continuous light snow for atmosphere
+  spawnSnow('idleGlobeGlass');
+  setInterval(()=>spawnSnow('idleGlobeGlass'), 4000);
 
   function showChristmas(){
-    spawnSnow();
-    spawnLights();
+    spawnSnow('globeGlass');
     xmasOverlay.classList.add('show');
-    const globeWrapEl = document.querySelector('.globe-wrap');
+    const globeWrapEl = document.getElementById('globeWrap');
     globeWrapEl.classList.remove('wobble');
     void globeWrapEl.offsetWidth;
     globeWrapEl.classList.add('wobble');
     setTimeout(()=>{
       xmasOverlay.classList.remove('show');
       showScanner();
-    }, 2600);
+    }, 3600);
   }
 
-  function showScanner(){
-    scannerOverlay.classList.add('show');
-  }
-
-  function closeScanner(){
-    scannerOverlay.classList.remove('show');
-  }
-
+  function showScanner(){ scannerOverlay.classList.add('show'); }
+  function closeScanner(){ scannerOverlay.classList.remove('show'); }
   closeScan.addEventListener('click', closeScanner);
 
   function startListening(){
@@ -369,9 +432,9 @@
     setStatus('Is browser mein motion sensor support nahi hai.');
   }
 
-  // Desktop testing helper: triple-click the shake icon
+  // Desktop testing helper: triple-click the globe
   let clickCount=0, clickTimer=null;
-  document.querySelector('.icon-shake').addEventListener('click', ()=>{
+  document.getElementById('idleGlobeWrap').addEventListener('click', ()=>{
     clickCount++;
     clearTimeout(clickTimer);
     clickTimer=setTimeout(()=>clickCount=0, 700);
