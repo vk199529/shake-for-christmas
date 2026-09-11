@@ -50,13 +50,6 @@
     color:#1a1400; font-weight:700; font-size:15px; cursor:pointer; display:none;
   }
   #status{ margin-top:16px; font-size:12px; color:#6c7a94; min-height:16px; }
-  #debugPanel{
-    position:fixed; left:10px; bottom:10px; right:10px;
-    background:rgba(0,0,0,.65); border:1px solid #2a3855; border-radius:10px;
-    padding:10px 12px; font-size:11px; line-height:1.6; color:#9fd6a8;
-    font-family:monospace; z-index:40; max-height:34vh; overflow-y:auto; text-align:left;
-  }
-  #debugPanel b{ color:var(--gold); }
 
   /* ---------- Christmas overlay ---------- */
   #xmasOverlay{
@@ -129,17 +122,6 @@
   <div id="status"></div>
 </div>
 
- <div id="debugPanel">
-  <div><b>Debug</b></div>
-  <div id="dbgSupport">devicemotion supported: checking...</div>
-  <div id="dbgPermission">permission: n/a</div>
-  <div id="dbgSecure">secure context (https): checking...</div>
-  <div id="dbgEvents">events received: 0</div>
-  <div id="dbgSpeed">last speed: -</div>
-  <div id="dbgHits">hits in window: 0 / 3</div>
-  <div id="dbgTrigger">shake triggers: 0</div>
-</div>
-
 <!-- Christmas overlay -->
 <div id="xmasOverlay">
   <div class="tree-box">
@@ -204,45 +186,26 @@
 
   function setStatus(msg){ statusEl.textContent = msg; }
 
-  const dbgSupport = document.getElementById('dbgSupport');
-  const dbgPermission = document.getElementById('dbgPermission');
-  const dbgSecure = document.getElementById('dbgSecure');
-  const dbgEvents = document.getElementById('dbgEvents');
-  const dbgSpeed = document.getElementById('dbgSpeed');
-  const dbgHits = document.getElementById('dbgHits');
-  const dbgTrigger = document.getElementById('dbgTrigger');
-  let eventCount = 0;
-  let triggerCount = 0;
-
-  dbgSupport.textContent = 'devicemotion supported: ' + (typeof DeviceMotionEvent !== 'undefined');
-  dbgSecure.textContent = 'secure context (https): ' + window.isSecureContext;
-
   function triggerSequence(){
     const now = Date.now();
     if(now - lastTrigger < COOLDOWN_MS) return;
     lastTrigger = now;
-    triggerCount++;
-    dbgTrigger.textContent = 'shake triggers: ' + triggerCount;
     if(navigator.vibrate) navigator.vibrate([60,40,60]);
     showChristmas();
   }
 
   function handleMotion(event){
-    eventCount++;
-    dbgEvents.textContent = 'events received: ' + eventCount;
     const acc = event.accelerationIncludingGravity || event.acceleration;
     if(!acc || acc.x===null || acc.x===undefined) return;
     const {x,y,z} = acc;
 
     const magnitude = Math.sqrt(x*x + y*y + z*z);
-    dbgSpeed.textContent = 'magnitude: ' + magnitude.toFixed(1) + ' (threshold ' + MAGNITUDE_THRESHOLD + ')';
 
     if(magnitude > MAGNITUDE_THRESHOLD){
       const now = Date.now();
       hitTimestamps.push(now);
       // purane hits hata do jo window se bahar ho gaye
       hitTimestamps = hitTimestamps.filter(t => now - t <= HIT_WINDOW_MS);
-      dbgHits.textContent = 'hits in window: ' + hitTimestamps.length + ' / ' + REQUIRED_HITS;
       if(hitTimestamps.length >= REQUIRED_HITS){
         hitTimestamps = [];
         triggerSequence();
@@ -305,22 +268,13 @@
 
   function startListening(){
     window.addEventListener('devicemotion', handleMotion);
-    setStatus('Motion sensor active — ab shake karke test karein.');
-    setTimeout(()=>{
-      if(eventCount === 0){
-        setStatus('⚠️ Koi motion event nahi mil raha. HTTPS pe host karke test karein (Vercel URL), preview mein nahi.');
-      }
-    }, 1500);
   }
 
   if(typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function'){
-    dbgPermission.textContent = 'permission: requestPermission() available (iOS 13+)';
     enableBtn.style.display='inline-block';
-    setStatus('iOS: neeche button dabakar motion access on karein.');
     enableBtn.addEventListener('click', async ()=>{
       try{
         const res = await DeviceMotionEvent.requestPermission();
-        dbgPermission.textContent = 'permission: ' + res;
         if(res === 'granted'){
           enableBtn.style.display='none';
           startListening();
@@ -332,10 +286,8 @@
       }
     });
   } else if(window.DeviceMotionEvent){
-    dbgPermission.textContent = 'permission: not required on this browser';
     startListening();
   } else {
-    dbgPermission.textContent = 'permission: DeviceMotionEvent unsupported';
     setStatus('Is browser mein motion sensor support nahi hai.');
   }
 
