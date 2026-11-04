@@ -302,18 +302,23 @@
   const xmasVideo = document.getElementById('xmasVideo');
   const scannerOverlay = document.getElementById('scannerOverlay');
   const closeScan = document.getElementById('closeScan');
+  const globeWrap = document.getElementById('idleGlobeWrap');
 
-  let lastX=null, lastY=null, lastZ=null;
-  const MAGNITUDE_THRESHOLD = 22;
-  const REQUIRED_HITS = 3;
+  // ---- shake settings ----
+  const SHAKE_DELTA = 18;      // lower = more sensitive
+  const REQUIRED_HITS = 3;     // number of strong movements needed
   const HIT_WINDOW_MS = 1000;
-  const COOLDOWN_MS = 6000;
-  let lastTrigger = 0;
+  const COOLDOWN_MS = 4000;
+
+  let lastX = null, lastY = null, lastZ = null;
   let hitTimestamps = [];
+  let lastTrigger = 0;
+  let busy = false;            // true while video/scanner is showing
+  let listening = false;
 
   function setStatus(msg){ statusEl.textContent = msg; }
 
-  // random background stars on idle stage
+  // background stars
   for(let i=0;i<22;i++){
     const s = document.createElement('div');
     s.className='bgstar';
@@ -325,36 +330,10 @@
     stage.appendChild(s);
   }
 
-  function triggerSequence(){
-    const now = Date.now();
-    if(now - lastTrigger < COOLDOWN_MS) return;
-    lastTrigger = now;
-    if(navigator.vibrate) navigator.vibrate([60,40,60]);
-    showChristmas();
-  }
-
-  function handleMotion(event){
-    const acc = event.accelerationIncludingGravity || event.acceleration;
-    if(!acc || acc.x===null || acc.x===undefined) return;
-    const {x,y,z} = acc;
-    const magnitude = Math.sqrt(x*x + y*y + z*z);
-    if(magnitude > MAGNITUDE_THRESHOLD){
-      const now = Date.now();
-      hitTimestamps.push(now);
-      hitTimestamps = hitTimestamps.filter(t => now - t <= HIT_WINDOW_MS);
-      if(hitTimestamps.length >= REQUIRED_HITS){
-        hitTimestamps = [];
-        triggerSequence();
-      }
-    }
-    lastX=x; lastY=y; lastZ=z;
-  }
-
   function spawnSnow(containerId){
     const glass = document.getElementById(containerId);
     glass.querySelectorAll('.globe-flake').forEach(el=>el.remove());
-    const count = 30;
-    for(let i=0;i<count;i++){
+    for(let i=0;i<30;i++){
       const flake = document.createElement('div');
       flake.className = 'globe-flake';
       const size = Math.random()*4+3;
@@ -366,52 +345,109 @@
       glass.appendChild(flake);
     }
   }
-
-  // idle globe: gentle continuous light snow for atmosphere
   spawnSnow('idleGlobeGlass');
-  setInterval(()=>spawnSnow('idleGlobeGlass'), 4000);
+  setInterval(()=>{ if(!busy) spawnSnow('idleGlobeGlass'); }, 4000);
+
+  // ---- main sequence: shake -> video -> scanner ----
+  function triggerSequence(){
+    const now = Date.now();
+    if(busy || now - lastTrigger < COOLDOWN_MS) return;
+    lastTrigger = now;
+    busy = true;
+
+    if(navigator.vibrate) navigator.vibrate([60,40,60]);
+
+    // shake feedback on the globe
+    globeWrap.classList.remove('wobble');
+    void globeWrap.offsetWidth;
+    globeWrap.classList.add('wobble');
+    spawnSnow('idleGlobeGlass');
+
+    // short moment to see the globe shake, then play video
+    setTimeout(showChristmas, 700);
+  }
+
+  let finished = false;
+  let fallbackTimer = null;
 
   function showChristmas(){
+    finished = false;
     xmasOverlay.classList.add('show');
     xmasVideo.currentTime = 0;
-    const playPromise = xmasVideo.play();
-    if(playPromise && playPromise.catch){
-      playPromise.catch(()=>{
-        // agar autoplay block ho jaye kisi wajah se, phir bhi thodi der baad scanner dikha do
-        setTimeout(finishChristmas, 3000);
-      });
+    const p = xmasVideo.play();
+    if(p && p.catch){
+      p.catch(()=>{ fallbackTimer = setTimeout(finishChristmas, 2000); });
     }
+    // safety: if video never ends, show scanner anyway after 30s
+    clearTimeout(fallbackTimer);
+    fallbackTimer = setTimeout(finishChristmas, 30000);
   }
 
   function finishChristmas(){
+    if(finished) return;
+    finished = true;
+    clearTimeout(fallbackTimer);
     xmasOverlay.classList.remove('show');
     xmasVideo.pause();
     showScanner();
   }
 
-  xmasVideo.addEventListener('ended', finishChristmas);
+  xmasVideo.addEventListener('ended', finishChristmas);   // video finished -> scanner
+  xmasVideo.addEventListener('error', finishChristmas);   // video missing -> scanner
 
   function showScanner(){ scannerOverlay.classList.add('show'); }
-  function closeScanner(){ scannerOverlay.classList.remove('show'); }
+  function closeScanner(){
+    scannerOverlay.classList.remove('show');
+    busy = false;                       // allow shaking again
+    lastTrigger = Date.now();
+  }
   closeScan.addEventListener('click', closeScanner);
 
+  // ---- shake detection (based on CHANGE in movement) ----
+  function handleMotion(event){
+    if(busy) return;
+    const acc = event.accelerationIncludingGravity;
+    if(!acc || acc.x == null) return;
+    const {x,y,z} = acc;
+
+    if(lastX !== null){
+      const delta = Math.abs(x-lastX) + Math.abs(y-lastY) + Math.abs(z-lastZ);
+      if(delta > SHAKE_DELTA){
+        const now = Date.now();
+        hitTimestamps.push(now);
+        hitTimestamps = hitTimestamps.filter(t => now - t <= HIT_WINDOW_MS);
+        if(hitTimestamps.length >= REQUIRED_HITS){
+          hitTimestamps = [];
+          triggerSequence();
+        }
+      }
+    }
+    lastX = x; lastY = y; lastZ = z;
+  }
+
   function startListening(){
+    if(listening) return;
+    listening = true;
     window.addEventListener('devicemotion', handleMotion);
   }
 
-  if(typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function'){
-    enableBtn.style.display='inline-block';
-    enableBtn.addEventListener('click', async ()=>{
+  // iPhone needs permission; Android starts directly
+  if(typeof DeviceMotionEvent !== 'undefined' &&
+     typeof DeviceMotionEvent.requestPermission === 'function'){
+    enableBtn.style.display = 'inline-block';
+    enableBtn.addEventListener('click', async (e)=>{
+      e.stopPropagation();
       try{
         const res = await DeviceMotionEvent.requestPermission();
         if(res === 'granted'){
-          enableBtn.style.display='none';
+          enableBtn.style.display = 'none';
+          setStatus('');
           startListening();
         } else {
-          setStatus('Permission deny hui. Phone Settings > Safari > Motion & Orientation Access se allow karein.');
+          setStatus('Permission deny hui. Settings > Safari > Motion & Orientation Access se allow karein.');
         }
-      }catch(e){
-        setStatus('Error: ' + e.message);
+      }catch(err){
+        setStatus('Error: ' + err.message);
       }
     });
   } else if(window.DeviceMotionEvent){
@@ -420,14 +456,8 @@
     setStatus('Is browser mein motion sensor support nahi hai.');
   }
 
-  // Desktop testing helper: triple-click the globe
-  let clickCount=0, clickTimer=null;
-  document.getElementById('idleGlobeWrap').addEventListener('click', ()=>{
-    clickCount++;
-    clearTimeout(clickTimer);
-    clickTimer=setTimeout(()=>clickCount=0, 700);
-    if(clickCount>=3){ clickCount=0; triggerSequence(); }
-  });
+  // tapping the globe also works (as shown in your design: "Antippen oder Schütteln")
+  globeWrap.addEventListener('click', triggerSequence);
 })();
 </script>
 
