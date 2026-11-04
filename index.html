@@ -137,7 +137,6 @@
     z-index:2;
     display:flex;
     align-items:flex-end;
-    gap:-6px;
   }
   .tree{ width:0; height:0; position:relative; margin:0 -4px; }
   .tree.tall{ transform: translateY(0); }
@@ -189,13 +188,14 @@
   .globe-base .b2{ font-size:8px; font-weight:700; letter-spacing:1px; color:var(--white); }
 
   #enableBtn{
-    margin-top:26px; padding:11px 22px; border-radius:999px; border:none;
+    margin-top:34px; padding:12px 24px; border-radius:999px; border:none;
     background: linear-gradient(135deg, var(--gold), #c99b1e);
     color:#1a1400; font-weight:700; font-size:14px; cursor:pointer; display:none;
+    font-family:inherit;
   }
   #status{ margin-top:14px; font-size:12px; color:#8fa0c9; min-height:16px; max-width:280px; }
 
-  /* ---------- Christmas (shake result) overlay — plays uploaded video ---------- */
+  /* ---------- Christmas (shake result) overlay — plays video ---------- */
   #xmasOverlay{
     position:fixed; inset:0;
     background: var(--navy);
@@ -212,7 +212,7 @@
     filter: drop-shadow(0 12px 22px rgba(0,0,0,.45));
   }
 
-  /* ---------- Scanner (static image) overlay ---------- */
+  /* ---------- Scanner overlay ---------- */
   #scannerOverlay{
     position:fixed; inset:0;
     background: var(--navy);
@@ -256,18 +256,21 @@
     <div class="globe-base"><div class="b1">ÖSTU</div><div class="b2">STETTIN</div></div>
   </div>
 
-  <button id="enableBtn">Motion Access On Karein</button>
+  <!-- Only shown on iPhone: one tap to allow the motion sensor, then just shake -->
+  <button id="enableBtn">Shake chalu karein (ek baar tap)</button>
   <div id="status"></div>
 </div>
 
-<!-- Christmas overlay (shown after shake) -->
+<!-- Christmas video overlay (plays after shake) -->
 <div id="xmasOverlay">
   <video id="xmasVideo" class="xmas-video" src="christmas.mp4" muted playsinline preload="auto"></video>
 </div>
 
-<!-- Scanner (static image) overlay -->
+<!-- Scanner overlay (shows after video) -->
 <div id="scannerOverlay">
   <button class="close-scan" id="closeScan">✕</button>
+  <!-- Placeholder QR drawing. To use your real QR code, replace this whole <svg> with:
+       <img class="scanner-graphic" src="qr.png" alt="QR code"> -->
   <svg class="scanner-graphic" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
     <rect x="10" y="10" width="180" height="180" rx="16" fill="#0f2a5c" stroke="#f5c623" stroke-width="2"/>
     <path d="M28 50 V32 a4 4 0 0 1 4 -4 h18" stroke="#f5c623" stroke-width="5" fill="none" stroke-linecap="round"/>
@@ -305,31 +308,34 @@
   const globeWrap = document.getElementById('idleGlobeWrap');
 
   // ---- shake settings ----
-  const SHAKE_DELTA = 18;      // lower = more sensitive
+  const SHAKE_DELTA = 18;      // lower = more sensitive (try 12), higher = harder (try 25)
   const REQUIRED_HITS = 3;     // number of strong movements needed
-  const HIT_WINDOW_MS = 1000;
+  const HIT_WINDOW_MS = 1000;  // ...within this time
   const COOLDOWN_MS = 4000;
 
   let lastX = null, lastY = null, lastZ = null;
   let hitTimestamps = [];
   let lastTrigger = 0;
-  let busy = false;            // true while video/scanner is showing
+  let busy = false;            // true while video / scanner is showing
   let listening = false;
+  let finished = false;
+  let fallbackTimer = null;
 
   function setStatus(msg){ statusEl.textContent = msg; }
 
   // background stars
   for(let i=0;i<22;i++){
     const s = document.createElement('div');
-    s.className='bgstar';
+    s.className = 'bgstar';
     const size = Math.random()*2+1;
-    s.style.width=size+'px'; s.style.height=size+'px';
+    s.style.width = size+'px'; s.style.height = size+'px';
     s.style.left = Math.random()*100+'vw';
     s.style.top = Math.random()*80+'vh';
     s.style.animationDelay = Math.random()*2.5+'s';
     stage.appendChild(s);
   }
 
+  // snow inside the globe
   function spawnSnow(containerId){
     const glass = document.getElementById(containerId);
     glass.querySelectorAll('.globe-flake').forEach(el=>el.remove());
@@ -348,7 +354,7 @@
   spawnSnow('idleGlobeGlass');
   setInterval(()=>{ if(!busy) spawnSnow('idleGlobeGlass'); }, 4000);
 
-  // ---- main sequence: shake -> video -> scanner ----
+  // ---- main sequence: shake -> globe wobble -> video -> scanner ----
   function triggerSequence(){
     const now = Date.now();
     if(busy || now - lastTrigger < COOLDOWN_MS) return;
@@ -357,29 +363,24 @@
 
     if(navigator.vibrate) navigator.vibrate([60,40,60]);
 
-    // shake feedback on the globe
     globeWrap.classList.remove('wobble');
     void globeWrap.offsetWidth;
     globeWrap.classList.add('wobble');
     spawnSnow('idleGlobeGlass');
 
-    // short moment to see the globe shake, then play video
     setTimeout(showChristmas, 700);
   }
-
-  let finished = false;
-  let fallbackTimer = null;
 
   function showChristmas(){
     finished = false;
     xmasOverlay.classList.add('show');
     xmasVideo.currentTime = 0;
+    clearTimeout(fallbackTimer);
     const p = xmasVideo.play();
     if(p && p.catch){
       p.catch(()=>{ fallbackTimer = setTimeout(finishChristmas, 2000); });
     }
-    // safety: if video never ends, show scanner anyway after 30s
-    clearTimeout(fallbackTimer);
+    // safety: if the video never ends, show the scanner anyway after 30s
     fallbackTimer = setTimeout(finishChristmas, 30000);
   }
 
@@ -392,14 +393,15 @@
     showScanner();
   }
 
-  xmasVideo.addEventListener('ended', finishChristmas);   // video finished -> scanner
-  xmasVideo.addEventListener('error', finishChristmas);   // video missing -> scanner
+  xmasVideo.addEventListener('ended', finishChristmas);  // video done -> scanner
+  xmasVideo.addEventListener('error', finishChristmas);  // video missing -> scanner
 
   function showScanner(){ scannerOverlay.classList.add('show'); }
   function closeScanner(){
     scannerOverlay.classList.remove('show');
-    busy = false;                       // allow shaking again
+    busy = false;                 // allow shaking again
     lastTrigger = Date.now();
+    hitTimestamps = [];
   }
   closeScan.addEventListener('click', closeScanner);
 
@@ -408,7 +410,7 @@
     if(busy) return;
     const acc = event.accelerationIncludingGravity;
     if(!acc || acc.x == null) return;
-    const {x,y,z} = acc;
+    const x = acc.x, y = acc.y, z = acc.z;
 
     if(lastX !== null){
       const delta = Math.abs(x-lastX) + Math.abs(y-lastY) + Math.abs(z-lastZ);
@@ -431,12 +433,11 @@
     window.addEventListener('devicemotion', handleMotion);
   }
 
-  // iPhone needs permission; Android starts directly
+  // iPhone needs one permission tap; Android starts directly
   if(typeof DeviceMotionEvent !== 'undefined' &&
      typeof DeviceMotionEvent.requestPermission === 'function'){
     enableBtn.style.display = 'inline-block';
-    enableBtn.addEventListener('click', async (e)=>{
-      e.stopPropagation();
+    enableBtn.addEventListener('click', async ()=>{
       try{
         const res = await DeviceMotionEvent.requestPermission();
         if(res === 'granted'){
@@ -456,8 +457,7 @@
     setStatus('Is browser mein motion sensor support nahi hai.');
   }
 
-  // tapping the globe also works (as shown in your design: "Antippen oder Schütteln")
-  globeWrap.addEventListener('click', triggerSequence);
+  // No click/tap trigger on purpose: only shaking the phone starts the sequence.
 })();
 </script>
 
