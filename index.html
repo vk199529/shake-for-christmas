@@ -187,12 +187,6 @@
   .globe-base .b1{ font-size:9px; font-weight:800; letter-spacing:1.5px; color:var(--gold); }
   .globe-base .b2{ font-size:8px; font-weight:700; letter-spacing:1px; color:var(--white); }
 
-  #enableBtn{
-    margin-top:34px; padding:12px 24px; border-radius:999px; border:none;
-    background: linear-gradient(135deg, var(--gold), #c99b1e);
-    color:#1a1400; font-weight:700; font-size:14px; cursor:pointer; display:none;
-    font-family:inherit;
-  }
   #status{ margin-top:14px; font-size:12px; color:#8fa0c9; min-height:16px; max-width:280px; }
 
   /* ---------- Christmas (shake result) overlay — plays video ---------- */
@@ -256,8 +250,6 @@
     <div class="globe-base"><div class="b1">ÖSTU</div><div class="b2">STETTIN</div></div>
   </div>
 
-  <!-- Only shown on iPhone: one tap to allow the motion sensor, then just shake -->
-  <button id="enableBtn">Shake chalu karein (ek baar tap)</button>
   <div id="status"></div>
 </div>
 
@@ -299,7 +291,6 @@
 <script>
 (function(){
   const statusEl = document.getElementById('status');
-  const enableBtn = document.getElementById('enableBtn');
   const stage = document.getElementById('stage');
   const xmasOverlay = document.getElementById('xmasOverlay');
   const xmasVideo = document.getElementById('xmasVideo');
@@ -433,24 +424,33 @@
     window.addEventListener('devicemotion', handleMotion);
   }
 
-  // iPhone needs one permission tap; Android starts directly
+  // No button. Android starts directly. On iPhone the permission pop-up is
+  // requested automatically (iOS only allows it right after a touch, so it
+  // appears on the person's first touch anywhere on the page, then only shaking is used).
+  async function askIOSPermission(){
+    try{
+      const res = await DeviceMotionEvent.requestPermission();
+      if(res === 'granted'){
+        setStatus('');
+        startListening();
+        removeTouchListeners();
+      } else {
+        setStatus('Motion allow karein: Settings > Safari > Motion & Orientation Access.');
+      }
+    }catch(err){
+      // not allowed yet (needs a touch) - will retry on next touch
+    }
+  }
+  function removeTouchListeners(){
+    document.removeEventListener('touchend', askIOSPermission);
+    document.removeEventListener('click', askIOSPermission);
+  }
+
   if(typeof DeviceMotionEvent !== 'undefined' &&
      typeof DeviceMotionEvent.requestPermission === 'function'){
-    enableBtn.style.display = 'inline-block';
-    enableBtn.addEventListener('click', async ()=>{
-      try{
-        const res = await DeviceMotionEvent.requestPermission();
-        if(res === 'granted'){
-          enableBtn.style.display = 'none';
-          setStatus('');
-          startListening();
-        } else {
-          setStatus('Permission deny hui. Settings > Safari > Motion & Orientation Access se allow karein.');
-        }
-      }catch(err){
-        setStatus('Error: ' + err.message);
-      }
-    });
+    askIOSPermission();                                   // try straight away
+    document.addEventListener('touchend', askIOSPermission);
+    document.addEventListener('click', askIOSPermission);
   } else if(window.DeviceMotionEvent){
     startListening();
   } else {
